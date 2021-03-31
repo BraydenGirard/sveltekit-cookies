@@ -1,15 +1,15 @@
 <script>
 	import Login from '$lib/Login.svelte';
-  import Register from '$lib/Register.svelte';
-  import { goto } from '$app/navigation';
-  function redirectToProfile() {
-    goto('/profile')
-  }
+  	import Register from '$lib/Register.svelte';
+  	import { goto } from '$app/navigation';
+	function redirectToProfile() {
+		goto('/profile')
+	}
 </script>
 
 <main>
 	<Login on:success={redirectToProfile}/>
-  <Register on:success={redirectToProfile} />
+  	<Register on:success={redirectToProfile} />
 </main>
 
 <style>

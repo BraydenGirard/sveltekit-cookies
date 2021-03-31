@@ -1,20 +1,24 @@
-import * as cookie from 'cookie';
-import * from '@replit/database';
+import getDbClient from '$lib/helpers/db'
+import * as cookie from 'cookie'
 
 const authenticatedRoutes = [
   '/profile'
 ]
 
+const db = getDbClient()
 
-/** @type {import('@sveltejs/kit').GetContext} */
 export async function getContext({ headers }) {
   const cookies = cookie.parse(headers.cookie || '');
-  const client = new Client();
-  const userEmail = await Client.get(cookies.session_id)
-  if(userEmail) {
+  if(!cookies.session_id) {
+    return {
+      authenticated: false
+    }
+  }
+  const user = JSON.parse(await db.get(cookies.session_id))
+  if(user && user.email) {
     return {
       authenticated: true,
-      userEmail
+      userEmail: user.email
     }
   } else {
     return {
@@ -23,19 +27,8 @@ export async function getContext({ headers }) {
   }
 }
 
-/** @type {import('@sveltejs/kit').Handle} */
-export async function handle(request, render) {
-	const response = await render(request);
-  console.log(request.path)
-  if(!request.context.authenticated && authenticatedRoutes.includes(request.path)) {
-    response.status = 401,
-    response.body = {},
-    response.headers = {}
-  }
+export function getSession({ context }) {
 	return {
-		...response,
-		headers: {
-			...response.headers
-		}
+    authorized: context.authenticated
 	};
 }

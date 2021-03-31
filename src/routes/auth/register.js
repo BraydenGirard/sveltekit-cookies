@@ -1,10 +1,11 @@
+import getDbClient from '$lib/helpers/db'
+import stringHash from 'string-hash'
+import { v4 as uuidv4 } from 'uuid';
 
-import * from '@replit/database';
-import { stringHash } from 'string-hash'
+const db = getDbClient()
 
 export async function post({ body }) {
-	const client = new Client();
-  const user = await Client.get(body.email);
+  const user = JSON.parse(await db.get(body.email));
   if(user) {
     return {
       status: 409,
@@ -14,24 +15,27 @@ export async function post({ body }) {
     }
   }
 
-  await Client.set(body.email, {
-    password: stringHash(body.password)
-  })
+  await db.set(body.email, JSON.stringify({
+    password: stringHash(body.password),
+    name: body.name
+  }))
 
   const cookieId = uuidv4()
-  await Client.set('session_id', {
+  await db.set('session_id', JSON.stringify({
     cookieId,
     email: user.email
-  })
-
+  }))
+  const headers = {
+    'Set-Cookie': cookie.serialize('session_id', cookieId, {
+                    httpOnly: true,
+                    maxAge: 60 * 60 * 24 * 7 // 1 week
+                  })
+  }
+  console.log(headers)
+  console.log('Hello!')
   return {
     status: 200,
-     headers: {
-      'Set-Cookie': cookie.serialize('session_id', cookieId, {
-                      httpOnly: true,
-                      maxAge: 60 * 60 * 24 * 7 // 1 week
-                    })
-    },
+    headers,
     body: {
       message: "Success"
     }

@@ -1,17 +1,20 @@
-
-import * from '@replit/database';
-import { stringHash } from 'string-hash'
+import getDbClient from '$lib/helpers/db'
+import stringHash from 'string-hash'
 import * as cookie from 'cookie';
 import { v4 as uuidv4 } from 'uuid';
 
+const db = getDbClient()
+
 export async function post({ body }) {
-	const client = new Client();
-  const user = await Client.get(body.email);
+  const user = JSON.parse(await db.get(body.email));
   if(!user) {
     return {
       status: 401,
       body: {
         message: "Unauthorized"
+      },
+      headers: {
+        'Content-Type': 'application/json'
       }
     }
   }
@@ -25,10 +28,10 @@ export async function post({ body }) {
   }
 
   const cookieId = uuidv4()
-  await Client.set('session_id', {
+  await db.set('session_id', JSON.stringify({
     cookieId,
     email: user.email
-  })
+  }))
 
   return {
     status: 200,

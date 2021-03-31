@@ -9,10 +9,10 @@
     try {
       const res = await fetch('/auth/login', {
         method: 'POST',
-        body: {
+        body: JSON.stringify({
           email,
           password
-        }
+        })
       })
       if(res.ok) {
         dispatch('success');
