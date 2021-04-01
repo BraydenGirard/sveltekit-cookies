@@ -12,7 +12,10 @@
         body: JSON.stringify({
           email,
           password
-        })
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
       })
       if(res.ok) {
         dispatch('success');

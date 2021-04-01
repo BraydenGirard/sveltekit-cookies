@@ -1,24 +1,23 @@
-import getDbClient from '$lib/helpers/db'
 import * as cookie from 'cookie'
+import { Tedis } from "tedis";
 
-const authenticatedRoutes = [
-  '/profile'
-]
-
-const db = getDbClient()
+const db = new Tedis({host: "127.0.0.1", port: 6379})
 
 export async function getContext({ headers }) {
-  const cookies = cookie.parse(headers.cookie || '');
+  const cookies = cookie.parse(headers.cookie || '')
+
   if(!cookies.session_id) {
     return {
       authenticated: false
     }
   }
-  const user = JSON.parse(await db.get(cookies.session_id))
-  if(user && user.email) {
+  
+  const userSession = JSON.parse(await db.get(cookies.session_id))
+
+  if(userSession) {
     return {
       authenticated: true,
-      userEmail: user.email
+      email: userSession.email
     }
   } else {
     return {
@@ -28,7 +27,13 @@ export async function getContext({ headers }) {
 }
 
 export function getSession({ context }) {
+  if(!context.authenticated) {
+    return {
+      authenticated: context.authenticated
+    };
+  }
 	return {
-    authorized: context.authenticated
+    authenticated: context.authenticated,
+    email: context.email
 	};
 }

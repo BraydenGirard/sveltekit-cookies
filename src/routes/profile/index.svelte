@@ -1,9 +1,14 @@
 <script context="module">
-    export async function load({session}) {
-        if(!session.authorized) {
+    export async function load({session, }) {
+        if(!session.authenticated) {
             return {
                 status: 302,
                 redirect: '/auth/unauthorized'
+            }
+        }
+        return {
+            props: {
+                email: session.email
             }
         }
     }
@@ -11,13 +16,15 @@
 
 <script>
     import { onMount } from "svelte";
-    let user
+    let name
+    export let email
     onMount(async () => {
 		const res = await fetch(`/user`);
-		user = await res.json();
+		const user = await res.json();
+        name = user.name
 	});
 </script>
 
 <h1>Profile Page</h1>
 
-<p>Welcome to your profile {user.name}!</p>
+<p>Welcome to your profile {name}! We got your email from the session, it should be {email} is that correct?</p>
