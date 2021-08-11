@@ -1,5 +1,5 @@
 <script context="module">
-    export async function load({session, }) {
+    export async function load({session}) {
         if(!session.authenticated) {
             return {
                 status: 302,
